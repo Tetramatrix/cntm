@@ -1,0 +1,125 @@
+<head>
+<title></title>
+<script language="javascript" type="text/javascript">
+document.write("<font color='green'>This document was last modified on "+document.lastModified+"</font>");
+</script></head>
+<body>
+<form method="post" action="ClimateNormalsTiledMap.php"> 		
+<table><tr><td>
+	<table><tr><td>
+		<img src="IESRElogo.jpg" height="75" width="75">
+		</td></tr><tr><td align="center"><b><i><font color="blue">IESRE</font></i></b></td></tr>
+	</table>
+	</td><td>
+	<table><tr><td>
+	<img src="NOAAlogo.jpg" valign="top"></td><td>
+	</td></tr><tr><td align="center"><font color="blue" face="sans-serif"><b>NOAA data</b></font></td></tr>
+	</table>
+	</td><td>
+	<h2>1971-2000 and 1981-2010 Climate Normals for the 50 States,
+	<br />DC, and territories: Tiled Contour Maps</h2>	
+	Accesses 30-year climate normals by state, for 1971-2000 or 1981-2010. Data are reported by month plus<br />
+	annual average. 
+	Click <a href="ClimateNormalsOverview.htm">HERE</a> for a brief
+overview of climate normal datasets. 
+	Click <a href="DelaunayTriangles.htm" target="_blank">HERE</a> for a description<br /> of how the tiled maps are generated.
+	<br />
+</td></tr></table>
+<hr />
+<table border><tr><td>	  
+Select State (other): <br />
+<select name="State" size="12" > 
+	<option value="AK">AK - Alaska</option>
+	<option value="AL">AL - Alabama</option>
+	<option value="AR">AR - Arkansas</option>
+	<option value="AZ">AZ - Arizona</option>
+	<option value="CA">CA - California</option>		
+	<option value="CO">CO - Colorado</option>
+	<option value="CT">CT - Connecticut</option>
+	<option value="DC">DC - District of Columbia</option>
+	<option value="DE">DE - Delaware</option>
+	<option value="FL">FL - Florida</option>
+	<option value="GA">GA - Georgia</option>
+	<option value="HI">HI - Hawaii</option>
+	<option value="IA">IA - Iowa</option>
+	<option value="ID">ID - Idaho</option>
+	<option value="IL">IL - Illinois</option>
+	<option value="IN">IN - Indiana</option>
+	<option value="KS">KS - Kansas</option>
+	<option value="KY">KY - Kentucky</option>
+	<option value="LA">LA - Louisiana</option>
+	<option value="MA">MA - Massachusetts</option>
+	<option value="MD">MD - Maryland</option>
+	<option value="ME">ME - Maine</option>
+	<option value="MI">MI - Michigan</option>
+	<option value="MN">MN - Minnesota</option>
+	<option value="MO">MO - Missouri</option>
+	<option value="MS">MS - Mississippi</option>
+	<option value="MT">MT - Montana</option>		   
+	<option value="NC">NC - North Carolina</option>
+	<option value="ND">ND - North Dakota</option>
+	<option value="NE">NE - Nebraska</option>
+	<option value="NH">NH - New Hampshire</option>
+	<option value="NJ">NJ - New Jersey</option>
+	<option value="NM">NM - New Mexico</option>
+	<option value="NV">NV - Nevada</option>
+	<option value="NY">NY - New York</option>
+	<option value="OH">OH - Ohio</option>
+	<option value="OK">OK - Oklahoma</option>
+	<option value="OR">OR - Oregon</option>
+	<option value="PA">PA - Pennsylvania</option>	 
+	<option value="PI">PI - Pacific Islands</option>	
+	<option value="PR">PR - Puerto Rico</option>
+	<option value="RI">RI - Rhode Island</option>
+	<option value="SC">SC - South Carolina</option>
+	<option value="SD">SD - South Dakota</option>
+	<option value="TN">TN - Tennessee</option>
+	<option value="TX">TX - Texas</option>
+	<option value="UT">UT - Utah</option>
+	<option value="VA">VA - Virginia</option>  
+	<option value="VI">VI - Virgin Islands</option>
+	<option value="VT">VT - Vermont</option>
+	<option value="WA">WA - Washington</option>
+	<option value="WI">WI - Wisconsin</option>
+	<option value="WV">WV - West Virginia</option>
+	<option value="WY">WY - Wyoming</option>
+</select>
+</td><td>    
+Select time period:
+<input type="radio" name="period" value="1971_2000" />1971-2000 &nbsp; &nbsp;
+<input type="radio" name="period" value="1981_2010" checked />1981-2010
+<hr />
+Parameters (select one):<br /> 
+ 	
+(ft) <input type="radio" name="parameter" value="Elevation" /> site elevation<br />
+(&deg;F) <input type="radio" name="parameter" value="Mean" checked />Average temperature
+ &nbsp; &nbsp; <input type="radio" name="parameter" value="Maximum"  />Maximum Temperature
+ &nbsp; &nbsp; <input type="radio" name="parameter" value="Minimum"  />Minimum Temperature<br />
+(inches) <input type="radio" name="parameter" value="Precip"  />Precipitation 
+ &nbsp; &nbsp; <input type="radio" name="parameter" value="Snow"  />Snow (1981-2010 only)<br />
+(65&deg;F base) <input type="radio" name="parameter" value="HDD"  />Heating Degree Days
+ &nbsp; &nbsp; <input type="radio" name="parameter" value="CDD" />Cooling Degree Days <hr /> 
+Select output:<br />
+
+<input type="radio" name="month" value="1" /> Jan 
+<input type="radio" name="month" value="2" /> Feb 
+<input type="radio" name="month" value="3" /> Mar
+<input type="radio" name="month" value="4" /> Apr
+<input type="radio" name="month" value="5" /> May
+<input type="radio" name="month" value="6" /> Jun
+<input type="radio" name="month" value="7" /> Jul
+<input type="radio" name="month" value="8" /> Aug
+<input type="radio" name="month" value="9" /> Sep
+<input type="radio" name="month" value="10" /> Oct
+<input type="radio" name="month" value="11" /> Nov
+<input type="radio" name="month" value="12" /> Dec
+<input type="radio" name="month" value="13" checked /> Annual	
+<hr />
+
+</td>
+</tr></table>
+<br />
+<input type="submit" value="Click here to generate tiled map." />			
+</form>
+</body>
+</html>
