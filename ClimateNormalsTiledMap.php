@@ -1,13 +1,13 @@
 <?php
 //error_reporting(E_ALL);
-//ini_set('display_errors', 1);
+ini_set('display_errors', 1);
 ini_set('display_errors',1);
 ini_set('display_startup_errors',1);
 error_reporting(-1);
 ini_set("max_execution_time","1000");
 set_time_limit(1000);
 
-define("ALPHA",3.3);
+define("ALPHA",12.5);
 define("STEPS",6);
 require_once("contour.php");
 

@@ -1,10 +1,9 @@
 <?php
-
 /*****************************************************************
  * Copyright notice
  *
  * (c) 2013-2015 Chi Hoang (info@chihoang.de)
- *  All rights reserved
+ * All rights reserved
  *
  ****************************************************************/
 require_once("hilbert.php");
@@ -37,7 +36,7 @@ class Edge
       $this->e=new Point($x,$y);
    }
    
-   public function __get($field) {
+	 public function __get($field) {
       if($field == 'x')
       {
 	return $this->e->x;
@@ -69,7 +68,7 @@ class Point
 class Circle
 {
    var $x, $y, $r, $r2;
-   function Circle($x, $y, $r)
+   function Circle($x, $y, $r=0)
    {
       $this->x = $x;
       $this->y = $y;
@@ -77,35 +76,35 @@ class Circle
    }
 }
 
-
 class Image
 {
-   var $stageWidth, $stageHeight, $padX, $padY, $delaunay, $average, $shape, $points, $indices;
+   var $stageWidth, $stageHeight, $padX, $padY, $delaunay, $average, $shape, $points, $indices,$hull;
    
-   function __construct($pObj)
-   {
-      $this->stageWidth=$pObj->stageWidth;
-      $this->stageHeight=$pObj->stageHeight;
-      $this->padX=50;
-      $this->padY=100;
-      $this->delaunay=$pObj->delaunay;
-      $this->average=$pObj->average;
-      $this->shape=$pObj->shape;
-      $this->svertx=$pObj->svertx;
-      $this->sverty=$pObj->sverty;
-      $this->points=$pObj->points;
-      $this->indices=$pObj->indices;
-      $this->mean=$pObj->mean;
-   }
+	function __construct($pObj)
+	{
+	   $this->stageWidth=$pObj->stageWidth;
+	   $this->stageHeight=$pObj->stageHeight;
+	   $this->padX=50;
+	   $this->padY=100;
+	   $this->delaunay=$pObj->delaunay;
+	   $this->average=$pObj->average;
+	   $this->shape=$pObj->shape;
+	   $this->svertx=$pObj->svertx;
+	   $this->sverty=$pObj->sverty;
+	   $this->points=$pObj->points;
+	   $this->indices=$pObj->indices;
+	   $this->mean=$pObj->mean;
+	   $this->hull=$pObj->hull;
+	}
       
-   function dotproduct($x1,$y1,$x2,$y2,$px,$py)
-   {
-      $dx1 = $x2-$x1;
-      $dy1 = $y2-$y1;
-      $dx2 = $px-$x1;
-      $dy2 = $py-$y1;
-      return ($dx1*$dy2)-($dy1*$dx2);
-   }
+	function dotproduct($x1,$y1,$x2,$y2,$px,$py)
+	{
+	   $dx1 = $x2-$x1;
+	   $dy1 = $y2-$y1;
+	   $dx2 = $px-$x1;
+	   $dy2 = $py-$y1;
+	   return ($dx1*$dy2)-($dy1*$dx2);
+	}
    
 	//http://stackoverflow.com/questions/30421985/line-segment-intersection
     function linesCross($x1,$y1,$x2,$y2,$x3,$y3,$x4,$y4) {
@@ -167,71 +166,13 @@ class Image
 				$dx=$x2-$x1;
 				$dy=$y2-$y1;
 				$d=$dx*$dx+$dy*$dy;
-			   
-				$ok=0;
-				foreach ($this->svertx as $part => $val)
-				{
-					$k=count($this->svertx[$part]);
-					$ok=$this->pnpoly($k,$this->svertx[$part],$this->sverty[$part],$x1,$y1);
-					$ok=$this->pnpoly($k,$this->svertx[$part],$this->sverty[$part],$x2,$y2);
-					if ($ok) break;
-				}
-	    
-	    	    //http://stackoverflow.com/questions/1934210/finding-a-point-on-a-line
-				//	    $temp=sqrt($d);
-				//	    $r=2/$temp;
-				//	    $x3=$r*$x2+(1-$r)*$x1;
-				//	    $y3=$r*$y2+(1-$r)*$y1;
-				//	    if (!$this->pnpoly($ns,$this->svertx,$this->sverty,$x3,$y3)) {
-				//	       ++$c;
-				//            }
-				//	    
-				//	    $r=3/$temp;
-				//	    $x3=$r*$x2+(1-$r)*$x1;
-				//	    $y3=$r*$y2+(1-$r)*$y1;
-				//	    if (!$this->pnpoly($ns,$this->svertx,$this->sverty,$x3,$y3)) {
-				//	       ++$c;
-				//            }
-
-				for ($i=0,$end=count($this->svertx[$part]);$i<$end;$i+=2)
-				{
-					if ($this->linesCross($this->svertx[$part][$i],$this->sverty[$part][$i],
-								  $this->svertx[$part][$i+1],$this->sverty[$part][$i+1],
-									$x1,$y1,$x2,$y2))
-					{
-						//++$c;
-						$c+=1.2;
-						break;
-					}
-				}
-				
-				//if (!$this->pnpoly($ns,$this->svertx,$this->sverty,($x1+$x2)/2-10,($y1+$y2)/2-10)) {
-				//   ++$c;
-				//}
-				//if (!$this->pnpoly($ns,$this->svertx,$this->sverty,($x1+$x2)/2+10,($y1+$y2)/2+10)) {
-				//   ++$c;
-				//}
-	    
-				if (!$this->pnpoly(count($this->svertx[$part]),
-								   $this->svertx[$part],$this->sverty[$part],
-								   ($x1+$x2)/2,($y1+$y2)/2))
-				{
-					$c+=4;
-				}
-	
-				if ($c==0 && $ok && abs($x1)!=SUPER_TRIANGLE &&
+		
+				if ($d<$this->average && abs($x1)!=SUPER_TRIANGLE &&
 					abs($y1)!=SUPER_TRIANGLE && abs($x2)!=SUPER_TRIANGLE && abs($y2)!=SUPER_TRIANGLE)
 				{
 				   $points[$key][]=$arr->$ikey->x->x+$this->padX;
 				   $points[$key][]=$arr->$ikey->x->y+$this->padY;
-				   $subject[$key][$ikey]=$this->indices[$key]->$ikey;
-				
-				} else if ($c>1 && ($d*$c)<$this->average && abs($x1)!=SUPER_TRIANGLE &&
-						abs($y1)!=SUPER_TRIANGLE && abs($x2)!=SUPER_TRIANGLE && abs($y2)!=SUPER_TRIANGLE)
-				{   
-				   $points[$key][]=$arr->$ikey->x->x+$this->padX;
-				   $points[$key][]=$arr->$ikey->x->y+$this->padY;
-				   $subject[$key][$ikey]=$this->indices[$key]->$ikey;
+				   $subject[$key][$ikey]=$this->indices[$key]->$ikey;			
 				}
 			}
 		}
@@ -273,11 +214,11 @@ class Image
 	    
 				goto triangleEnd;
 	
-				for ($i=0,$e=count($arr);$i<$e;$i+=2) {
+				for ($i=0,$e=count($arr)-2;$i<$e;$i+=2) {
 				   list($x1,$y1,$x2,$y2)=array($arr[$i],$arr[$i+1],$arr[$i+2],$arr[$i+3]);
 				   if ($x1!=0 && $y1!=0 && $x2!=0 && $y2!=0) {
 					  //imagefilledellipse($im,$arr[$i],$arr[$i+1], 4, 4, $black);
-					  imageline($im,$arr[$i],$arr[$i+1],$arr[$i+2],$arr[$i+3],$grey_dark);
+					  imageline($im,$x1,$y1,$x2,$y2,$grey_dark);
 				   }
 				}
 				imageline($im,$arr[0],$arr[1],$arr[$i-2],$arr[$i-1],$grey_dark);	    
@@ -285,77 +226,22 @@ triangleEnd:
 			}
 		}
       
-		if (!$triangles) {	
-			foreach ($this->delaunay as $key => $arr)
+		goto drawEnd;
+	  	
+		foreach ($this->hull as $key => $arr)
+	    {
+			foreach ($arr as $ikey => $iarr)
 			{
-				$c=0;
-				foreach ($arr as $ikey => $iarr)
+				list($x1,$y1,$x2,$y2) = array($iarr->x->x,$iarr->x->y,$iarr->y->x,$iarr->y->y);
+				
+				if (abs($x1) != SUPER_TRIANGLE && abs($y1) != SUPER_TRIANGLE
+					&& abs($x2) != SUPER_TRIANGLE && abs($y2) != SUPER_TRIANGLE)
 				{
-					list($x1,$y1,$x2,$y2)=array($iarr->x->x,$iarr->x->y,$iarr->y->x,$iarr->y->y);
-					$dx=$x2-$x1;
-					$dy=$y2-$y1;
-					$d=$dx*$dx+$dy*$dy*15;
-			
-					if ($d<$this->average && abs($x1)!=SUPER_TRIANGLE && abs($y1)!=SUPER_TRIANGLE && abs($x2)!=SUPER_TRIANGLE && abs($y2)!=SUPER_TRIANGLE )
-					{
-					   $points[$key][]=$arr->$ikey->x->x+$this->padX;
-					   $points[$key][]=$arr->$ikey->x->y+$this->padY;
-					   $subject[$key][$ikey]=$this->indices[$key]->$ikey;			
-					} 
-				}
-			}
-			
-			$triangles=0;
-			foreach ($points as $key=>$arr) {
-				
-				if (count($arr)>=6  && count($subject[$key])==3) {
-					++$triangles;
-				
-					$arr=array_values($arr);
-					$averageX=($this->points[$subject[$key]["x"]]->alpha+$this->points[$subject[$key]["y"]]->alpha+$this->points[$subject[$key]["z"]]->alpha)/3;
-					
-					$zx = $this->points[$subject[$key]["x"]]->z;
-					$zy = $this->points[$subject[$key]["y"]]->z;
-					$zz = $this->points[$subject[$key]["z"]]->z;
-					
-					if ($zx<0 && $zy<0 && $zz<0) goto triangleEnd2;
-					
-					$find=array($zx,$zy,$zz);
-					for ($i=0;$i<3;$i++) {
-						for ($j=0;$j<3;$j++) {
-							if ($i!=$j && $find[$i]<0 && $find[$j]>0 ) {
-								$find[$i]=$find[$j];
-							}
-						}
-					}
-					list($zx,$zy,$zz)=$find;
-					$averageZ=($zx+$zy+$zz)/3;
-			
-					$delta=min((max($averageX,$averageZ)-min($averageX,$averageZ))*(255/STEPS),190);
-					list($r,$g,$b)=$averageX>$averageZ ? array(190-$delta,190-$delta,255) : array(255,190-$delta,190-$delta);
-					$col= imagecolorstotal($im)>=255 ? imagecolorclosest($im,$r,$g,$b) : imagecolorallocate($im,$r,$g,$b);
-			
-					//imagefilledellipse($im,$arr[$i],$arr[$i+1], 4, 4, $darkorange);
-					//imagefilledellipse($im,$arr[$i+2],$arr[$i+3], 4, 4, $darkorange);
-					//imagefilledellipse($im,($arr[$i]+$arr[$i+2])/2,($arr[$i+1]+$arr[$i+3])/2, 4, 4, $darkorange);
-				   
-					imagefilledpolygon($im,$arr,count($arr)/2,$col);
-				   
-					goto triangleEnd2;
-				   
-					for ($i=0,$e=count($arr);$i<$e;$i+=2) {
-					   list($x1,$y1,$x2,$y2)=array($arr[$i],$arr[$i+1],$arr[$i+2],$arr[$i+3]);
-					   if ($x1!=0 && $y1!=0 && $x2!=0 && $y2!=0) {
-						  //imagefilledellipse($im,$arr[$i],$arr[$i+1], 4, 4, $black);
-						  imageline($im,$arr[$i],$arr[$i+1],$arr[$i+2],$arr[$i+3],$grey_dark);
-					   }
-					}
-					imageline($im,$arr[0],$arr[1],$arr[$i-2],$arr[$i-1],$grey_dark);	    
-triangleEnd2:	    
+					imageline($im,$x1+$this->padX,$y1+$this->padY,$x2+$this->padX,$y2+$this->padY,$black);  
 				}
 			}
 		}
-
+		
 	    goto drawEnd;
       
 	    for ($i=0,$end=count($this->shape);$i<$end;$i+=2) {
@@ -372,7 +258,103 @@ triangleEnd2:
 			}
 		}
 drawEnd:
-   }
+	
+		$dummy = imagecreate(930,700);
+		$black2 = imagecolorallocate($dummy,0x00,0x00,0x00);
+		$white2 = imagecolorallocate ($dummy,0xff,0xff,0xff);
+		// Fill in the background of the image
+		imagefilledrectangle($dummy, 0, 0, $this->stageWidth, $this->stageHeight, $white2);
+		
+		foreach ($this->svertx as $part => $val)
+		{
+			$poly=array();
+			for($i=0,$z=count($this->svertx[$part]);$i<$z;$i++) {
+				$poly[]=$this->svertx[$part][$i];$poly[]=$this->sverty[$part][$i];
+			}
+			imagefilledpolygon($dummy,$poly,count($poly)/2,$black2);
+		}
+	
+		$hull=$this->hvertx=$this->hverty=array();
+		foreach ($this->hull as $key => $arr)
+	    {
+			foreach ($arr as $ikey => $iarr)
+			{
+				list($x1,$y1,$x2,$y2) = array($iarr->x->x,$iarr->x->y,$iarr->y->x,$iarr->y->y);
+				if (abs($x1) != SUPER_TRIANGLE && abs($y1) != SUPER_TRIANGLE
+					&& abs($x2) != SUPER_TRIANGLE && abs($y2) != SUPER_TRIANGLE)
+				{
+					$hull[]=array($x1,$y1,$x2,$y2);
+				}
+			}
+		}
+		
+		$v=$s=array();
+		list($x1,$y1,$x2,$y2)=$hull[0];
+		$s[]=$hull[0];
+		for ($i=0,$z=count($hull);$i<$z;$i++) {
+			$ok=0;
+			for ($j=1;$j<$z;$j++) {
+				list($x3,$y3,$x4,$y4)=$hull[$j];
+				if (!isset($v[$j]) && $x2==$x3 && $y2==$y3) {
+					$s[]=$hull[$j];
+					$v[$j]=1;
+					$x2=$x4;
+					$y2=$y4;
+					$ok=1;
+				} 
+				if($ok) break;
+			}
+		}
+		
+		foreach($s as $key=>$arr)
+		{
+			list($x1,$y1,$x2,$y2)=$arr;
+			$this->hvertx[]=$x1;$this->hverty[]=$y1;
+			$this->hvertx[]=$x2;$this->hverty[]=$y2;
+		}
+		
+		$mapLeft  = $this->stageWidth; 
+		$mapTop = $this->stageHeight; 
+		$mapRight = -$this->stageHeight;
+		$mapBottom = -$this->stageHeight;
+		
+		foreach ($this->svertx as $part => $val)
+		{
+			for($i=0,$z=count($this->svertx[$part]);$i<$z;$i++) {
+		        $mapLeft=min($mapLeft,$this->svertx[$part][$i]); 
+				$mapRight=max($mapRight,$this->svertx[$part][$i]); 
+                $mapBottom=max($mapBottom,$this->sverty[$part][$i]); 
+                $mapTop=min($mapTop,$this->sverty[$part][$i]); 
+			}
+		}
+	
+		//for($i=0,$z=count($this->hvertx);$i<$z;$i++) {
+		//	$mapLeft=min($mapLeft,$this->hvertx[$i]); 
+		//	$mapRight=max($mapRight,$this->hvertx[$i]); 
+		//	$mapBottom=max($mapBottom,$this->hverty[$i]); 
+		//	$mapTop=min($mapTop,$this->hverty[$i]); 
+		//}
+		
+		$bw=$mapRight-$mapLeft;
+		$bh=$mapBottom-$mapTop;
+		
+		for ($i=$mapLeft;$i<$bw;$i++) {
+			for ($j=$mapTop;$j<$bh;$j++) {
+				$rgb = imagecolorat($dummy, $i, $j);
+				if ($rgb) {
+					imagesetpixel($im,$i+$this->padX,$j+$this->padY, $white);
+				}
+			}
+		}
+		
+		// fix pixel errors
+		//for ($i=0,$z=count($this->hvertx);$i<$z;$i+=2) {
+		//	imageline($im,$this->hvertx[$i]+$this->padX,$this->hverty[$i]+$this->padY,
+		//			  $this->hvertx[$i+1]+$this->padX,$this->hverty[$i+1]+$this->padY,$white);
+		//	imageline($im,$this->hvertx[$i]+$this->padX+1,$this->hverty[$i]+$this->padY,
+		//			  $this->hvertx[$i+1]+$this->padX+1,$this->hverty[$i+1]+$this->padY,$white);
+		//}
+	}
 }
 
 class Contourplot
@@ -382,8 +364,54 @@ class Contourplot
 	var $delaunay = array();
 	var $points = array();
 	var $indices = array();
-	var $cc = array();
    
+	function max3( $a, $b, $c )
+	{
+		return ( $a >= $b && $a >= $c ) ? $a : ( $b >= $a && $b >= $c ) ? $b : $c;
+	}
+	function min3( $a, $b, $c ) {
+		return ( $a <= $b && $a <= $c ) ? $a : ( $b <= $a && $b <= $c ) ? $b : $c;
+	}
+	
+	// From: http://www.exaflop.org/docs/cgafaq/cga1.html
+	function CircumCircleX($x1,$y1,$x2,$y2,$x3,$y3)
+	{
+    	$A = $x2 - $x1; 
+		$B = $y2 - $y1; 
+		$C = $x3 - $x1; 
+		$D = $y3 - $y1; 
+
+		$E = $A*($x1 + $x2) + $B*($y1 + $y2); 
+		$F = $C*($x1 + $x3) + $D*($y1 + $y3); 
+
+		$G = 2.0*($A*($y3-$y2)-$B*($x3 - $x2)); 
+	
+		if(abs($G) < EPSILON)
+		{
+		// Collinear - find extremes and use the midpoint
+			$minx = $this->min3( $x1, $x2, $x3 );
+			$miny = $this->min3( $y1, $y2, $y3 );
+			$maxx = $this->max3( $x1, $x2, $x3 );
+			$maxy = $this->max3( $y1, $y2, $y3 );
+	
+			$center = new Circle(( $minx + $maxx ) / 2, ( $miny + $maxy ) / 2 );
+			$dx = $center->x - $minx;
+			$dy = $center->y - $miny;
+		}
+		else
+		{
+			$cx = ($D*$E - $B*$F) / $G; 
+			$cy = ($A*$F - $C*$E) / $G;
+	
+			$center = new Circle( $cx, $cy );
+	
+			$dx = $center->x - $x1;
+			$dy = $center->y - $y1;
+		}
+		$center->r = $dx*$dx + $dy*$dy;
+		return $center;	
+	}
+
 	function CircumCircle($x1,$y1,$x2,$y2,$x3,$y3)
 	{
 		$mx2=$my2=0;
@@ -395,11 +423,26 @@ class Contourplot
 		$absy1y2 = abs($y1-$y2);
 		$absy2y3 = abs($y2-$y3);
 
-		if ($absy1y2 < EPSILON)
+		if ($absy1y2 < EPSILON && $absy2y3 < EPSILON)
 		{
-			if ($absy2y3 < EPSILON) {
-			   $y3+=EPSILON;
-			}
+			// Collinear - find extremes and use the midpoint
+			$minx = $this->min3( $x1, $x2, $x3 );
+			$miny = $this->min3( $y1, $y2, $y3 );
+			$maxx = $this->max3( $x1, $x2, $x3 );
+			$maxy = $this->max3( $y1, $y2, $y3 );
+			
+			$xc = ($minx + $maxx ) / 2;
+			$yc = ($miny + $maxy ) / 2;
+
+			//$y3+=EPSILON;
+			//$m2 = -($x3-$x2) / ($y3-$y2);
+			//$mx2 = ($x2 + $x3) / 2.0;
+			//$my2 = ($y2 + $y3) / 2.0;
+			//$xc = ($x2 + $x1) / 2.0;
+			//$yc = $m2 * ($xc - $mx2) + $my2;
+			
+		} else if ($absy1y2 < EPSILON)
+		{
 			$m2 = -($x3-$x2) / ($y3-$y2);
 			$mx2 = ($x2 + $x3) / 2.0;
 			$my2 = ($y2 + $y3) / 2.0;
@@ -408,13 +451,9 @@ class Contourplot
 		}
 		else if ($absy2y3 < EPSILON)
 		{
-			if ($absy1y2 < EPSILON) {
-			   $y2+=EPSILON;
-			}
 			$m1 = -($x2-$x1) / ($y2-$y1);
 			$mx1 = ($x1 + $x2) / 2.0;
 			$my1 = ($y1 + $y2) / 2.0;
-			
 			$xc = ($x3 + $x2) / 2.0;
 			$yc = $m1*($xc - $mx1) + $my1;	
 		}
@@ -458,13 +497,15 @@ class Contourplot
 	{
 		$dx = $x - $c->x;
 		$dy = $y - $c->y;
-		$drsqr = $dx*$dx + $dy*$dy;
+		$drsqr = $dx*$dx+$dy*$dy;
 		$inside = (($drsqr-$c->r) <= EPSILON) ? true : false;
+		//$inside = ($drsqr <= $c->r) ? true : false;
 		return $inside;
 	}
    
-   function getEdges($n, $points)
-   {
+ 
+    function getEdges($n, $points)
+    {
 		/*
 		   Set up the supertriangle
 		   This is a triangle which encompasses all the sample points.
@@ -505,7 +546,7 @@ class Contourplot
 				$c=$this->CircumCircle($points[$vi]->x,$points[$vi]->y,
 					  $points[$vj]->x,$points[$vj]->y,
 					  $points[$vk]->x,$points[$vk]->y);
-				if ($c->x + $c->r < $points[$key]->x) $complete[$vkey]=1;
+				//if ($c->x + $c->r < $points[$key]->x) $complete[$vkey]=1;
 				if ($c->r > EPSILON && $this->inside($c, $points[$key]->x,$points[$key]->y))
 				{
 					$edges[]=new Edge($vi,$vj);
@@ -606,9 +647,8 @@ class Contourplot
 			if ($part[$k] == $part[$k-1]) {
 			   $this->shape[$part[$k]][]=array($x1,$y1);
 			   $this->shape[$part[$k]][]=array($shape[0][$i-1],$shape[0][$i]);
-			   $x1=$shape[0][$i-1];
-			   $y1=$shape[0][$i];
-			} 
+			}
+			$x1=$shape[0][$i-1]; $y1=$shape[0][$i];
 		}
 
 		//pnpoly shape
@@ -631,52 +671,105 @@ class Contourplot
 			}
 			$this->mean=$mean=$sum/$c;
 format:
+
 			for ($i=0,$end=count($points);$i<$end;$i+=3) {
 				$this->points[]=new Point($points[$i],$points[$i+1],$points[$i+2],$this->mean);   
 			}
+			
+			foreach ($this->points as $key=>$val) {
+				foreach ($this->points as $ikey=>$ival) {
+					if ($ikey!=$key) {
+						list($x1,$y1)=array($val->x,$val->y);
+						list($x2,$y2)=array($ival->x,$ival->y);
+						if ($x1==$x2 && $y1==$y2)
+						{
+							unset($this->points[$ikey]);
+						}
+					}
+				}
+			}
+			
+			//$sort=array();
+			//foreach ($this->points as $key=>$val) 
+			//{
+			//	list($x1,$y1)=array($val->x,$val->y);
+			//	$angle=$this->dotproduct($x[$vi],$y[$vi],
+			//							 $x[$vj],$y[$vj],$pObj->stageWidth/2,$pObj->stageHeight/2);
+			//	$sort[]=$angle;
+			//}
+			//array_multisort($sort, SORT_ASC, SORT_NUMERIC, $edges);   
 		}
       
-		//goto hilbert;
+		goto hilbert;
 		
-		$x=$y=$sortX=array(); 
-		foreach($this->points as $key=>$arr)
-		{
-			$sortX[$key]=$arr->x;
-		} 
-		array_multisort($sortX, SORT_ASC, SORT_NUMERIC, $this->points);
+		//$x=$y=$sortX=array(); 
+		//foreach($this->points as $key=>$arr)
+		//{
+		//	$sortX[$key]=$arr->x;
+		//} 
+		//array_multisort($sortX, SORT_ASC, SORT_NUMERIC, $this->points);
 		goto dt;
       
 hilbert:
 		$sortX=array(); 
-		$maxx=$maxy=0;
+		$mx=$my=0;
 		foreach ($this->points as $key => $arr)
 		{
-		  if ($maxx<$arr->x) $maxx=$arr->y;
-		  if ($maxy<$arr->y) $maxy=$arr->y;
+		  if ($mx<$arr->x) $mx=$arr->x;
+		  if ($my<$arr->y) $my=$arr->y;
 		}
       
 		$hilbert = new hilbert();     
-		$powx=$hilbert->power($maxx,2);     
-		$powy=$hilbert->power($maxy,2);
-		$order= ($powx<$powy) ? $powy : $powx;
+		$px=$hilbert->power($mx,2);     
+		$py=$hilbert->power($my,2);
+		$order = ($px<$py) ? $py : $px;
    
 		foreach($this->points as $key => $arr) {
-		   $sort[$key] = $hilbert->point2hilbert($arr->x, $arr->y, $order);
+		   $sort[$key] = $hilbert->point2hilbert($arr->y, $arr->x, $order+1);
 		}
-		array_multisort($sort, SORT_DESC, SORT_NUMERIC, $this->points);
+		array_multisort($sort, SORT_ASC, SORT_NUMERIC, $this->points);
 dt:
 		$result=$this->getEdges(count($this->points), $this->points);
 	 
 		$sum=$c=0;
 		foreach ($this->dist as $key => $arr)
 		{
-		  if (array_sum($arr)<SUPER_TRIANGLE)
-		  {
-			 $sum+=array_sum($arr);
-			 $c+=count($arr);   
-		  }
+			if (array_sum($arr)<SUPER_TRIANGLE)
+			{
+			   $sum+=array_sum($arr);
+			   $c+=count($arr);   
+			}
 		}
 		$this->average=($sum/$c)*$this->weight;
+		
+		$n=count($this->points);
+		foreach ($this->indices as $key => $arr)
+		{
+			foreach ($this->indices as $ikey => $iarr)
+			{
+			   if ($key != $ikey)
+			   {	       
+				 if ( ($arr->x==$iarr->y && $arr->y==$iarr->x) ||
+						  ($arr->x==$iarr->z && $arr->y==$iarr->y) ||
+						  ($arr->x==$iarr->x && $arr->y==$iarr->z) ||
+									   
+						  ($arr->y==$iarr->y && $arr->z==$iarr->x) ||
+						  ($arr->y==$iarr->z && $arr->z==$iarr->y) ||
+						  ($arr->y==$iarr->x && $arr->z==$iarr->z) ||
+						  
+						  ($arr->z==$iarr->y && $arr->x==$iarr->x) ||
+						  ($arr->z==$iarr->z && $arr->x==$iarr->y) ||
+						  ($arr->z==$iarr->x && $arr->x==$iarr->z) 
+						)
+					 {
+						if ($arr->x >= $n || $arr->y >= $n || $arr->z >= $n)
+						{   
+						   $this->hull[$key]=$this->delaunay[$key];
+						}
+					}
+				}
+			}
+		}
 		return $result;
 	}
 }
