@@ -84,8 +84,6 @@ class Image
 	{
 	   $this->stageWidth=$pObj->stageWidth;
 	   $this->stageHeight=$pObj->stageHeight;
-	   $this->padX=50;
-	   $this->padY=100;
 	   $this->delaunay=$pObj->delaunay;
 	   $this->average=$pObj->average;
 	   $this->shape=$pObj->shape;
@@ -107,7 +105,7 @@ class Image
 	}
    
 	//http://stackoverflow.com/questions/30421985/line-segment-intersection
-    function linesCross($x1,$y1,$x2,$y2,$x3,$y3,$x4,$y4) {
+      function linesCross($x1,$y1,$x2,$y2,$x3,$y3,$x4,$y4) {
         //$denominator = (line1.end.y - line1.start.y) * (line2.end.x - line2.start.x) -
         //    (line1.end.x - line1.start.x) * (line2.end.y - line2.start.y)
    
@@ -145,8 +143,10 @@ class Image
 		return $c;
 	}
    
-	function draw($im)
-	{	
+	function draw($im,$padX=50,$padY=100)
+	{
+	        $this->padX=$padX;
+	        $this->padY=$padY;
 		$white = imagecolorallocate ($im,0xff,0xff,0xff);
 		$black = imagecolorallocate($im,0x00,0x00,0x00);
 		$grey_lite = imagecolorallocate ($im,0xee,0xee,0xee);
