@@ -1,0 +1,101 @@
+<div class="wikidoc">
+<h3>PHP Contour Plot Package</h3>
+<p><strong>Introduction</strong></p>
+<p>Some applications require the visualization of 3 dimensional surfaces in 2 dimensional image.</p>
+<p>Contour plots allow us to render a representation of 3 dimensional surfaces that represent irregular shapes like for instance from a geographic map.</p>
+<p><img src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=cntm&DownloadId=1476023" alt="" width="600" height="452"></p>
+<h3>3 Dimensional Surfaces</h3>
+<p>One example that can be rendered as a contour plot &nbsp;is one that represents the height of the terrain in geographic maps. Another example is the representation of temperature in weather maps.</p>
+<p>This kind of graph or diagram is especially useful for agriculture (wheather forecasts), tourism, renewable energy, etc..</p>
+<p>Consider this, for each value that you need to represent on these maps, you need 3 values: X value represents the distance on x-axis, Y value represents distance the y-value, and the Z value represents a magnitude value that we would view in the z-axis if
+ the diagram was in 3 dimensions, but we need to represent it somehow in 2 dimensions.</p>
+<p>The&nbsp;<a href="http://www.phpclasses.org/package/9195-PHP-Render-contour-plots-from-geographic-shape-files.html">PHP Contour Plot package</a>&nbsp;solves the problem by plotting lines that have a constant Z value. These lines are called contours when
+ represented in a 2 dimensional diagram. That is, given a value for z, lines are drawn for connecting the (x,y) coordinates where the same Z value occurs.</p>
+<div>The simplest tiled map rendering solutions use the&nbsp;<strong>Marching Square</strong>&nbsp;algorithm. This package uses the<strong>Delaunay Triangulation</strong>&nbsp;to tile a map. Specifically it uses the&nbsp;<strong>Incremental Delaunay Triangulation</strong>&nbsp;which
+ is very fast and also very easy to implement.&nbsp;</div>
+<div>&nbsp;</div>
+<div>A Delaunay Triangulation is more accurate then a squared map but also more difficult to understand. A more advance algorithm is&nbsp;<strong>Kriging</strong>.</div>
+<div>&nbsp;</div>
+<div>When the Delaunay Triangulation is computed (it is time consuming because it users very difficult math) the Z value is mapped along each edge of the triangulation. For instance it uses the statewide average z value &nbsp;(approximately max(z)&#43;min(z))/2)
+ and interpolates the z slices/values from the z value of the triangulation.</div>
+<h3>Shapefile and Corners</h3>
+<p>Another problem is that a geographic map is not a convex hull but there are corners of the map that points towards the interior, i.e. the center of the map. In particular it does not look nice when this corner intersects with the triangulation and creates
+ multiple polygons.</p>
+<p>A shapefile is usually a text file with the coordinates of all points that have the same Z value.</p>
+<p>To address this issue, this package creates a virtual bitmap of the shapefile and uses a fast pixel-per-pixel hit-test if there is a corner that intersects with a triangulation. Other solutions do not perfectly match the borders of the shapefile and/or are
+ very slow to compute.</p>
+<p>If the pixel of the triangulation intersects or overlaps the shapefile it then gets simply deleted. The algorithm is very fast because it needs only to test for &nbsp;the color of the virtual bitmap. It can use the PHP functions<strong>imagecolorat()</strong>&nbsp;and&nbsp;<strong>imagesetpixel()</strong>.</p>
+<p>A geographic shape is often very irregular due to concave corners and isolated shapes (islands). Therefore the algorithm also computes a minimum bounding box from the shapefile to minimize the hit-test.</p>
+<h3>Color scheme and Greyshades</h3>
+<div>PHP Contour plot uses 2 colors and grey shades between the 2 colors to represent the difference in the z value compared to the statewide average z value. Specifically it lets you define a constant (STEPS) to perform linear interpolation to transform the
+ colors to a smoother visualization.</div>
+<h4>Greyshades</h4>
+<div>In the generated image, a color is represented by red, green and blue (RGB). The other colors and especially the shades of a color use the greyshade of a color. The greyshade level is other parameter of the color RGB value.</div>
+<h4>Interpolation</h4>
+<p>To create a linear interpolation of the values, this package finds the biggest z value and compute the difference (delta z) of the biggest z value and the statewide average z value and maps it to a range of values between 0 and 255. That is the minimum and
+ maximum value for the RGB color representation. Then the resulting RGB value is used in the the graph diagram.</p>
+<h2>Basic Example of the PHP Contour Plot Package</h2>
+<p>The PHP Contour Plot package requires PHP 5.3 or later. It can be&nbsp;<a href="http://www.phpclasses.org/package/9195-PHP-Render-contour-plots-from-geographic-shape-files.html#download">downloaded from the package page</a>here in the PHP Classes site.</p>
+<pre>require_once( &quot;contour.php&quot; );
+
+define(&quot;ALPHA&quot;, 12.5);
+define(&quot;STEPS&quot;, 6);
+
+// your code here
+
+$plot = new Contourplot();
+$res = $plot-&gt;main( $D, $x_size, $y_size, $A, $mean, ALPHA);
+$pic = new Image( $plot );
+$pic-&gt;draw( $im );
+
+// your code here
+
+ImageGIF($im);
+ImageDestroy($im);</pre>
+<h2>A More In Depth Tutorial</h2>
+<p>The generation of a a contour plot creation is divided into 2 parts: the algorithm and the graphical presentation.</p>
+<p>The PHP Contour Plot package expects two constants to be defined with the names&nbsp;ALPHA and STEPS.</p>
+<h3>The ALPHA Constant</h3>
+<p>The ALPHA value is a positive number from 0 to infinity. It is used to hide or delete edges longer then the average of the statewide euclidian distance (alpha shape).</p>
+<p>A value of 1 means that if the edges are greater or equal, then the average get deleted. A value above 1 means edges greater or equal then the average multiplied the ALPHA value get deleted. A value below 1 means edges greater or equal then the average multiply
+ by ALPHA get deleted.</p>
+<p>For instance you can set ALPHA to 12.5:</p>
+<pre>define(&quot;ALPHA&quot; ,12.5);</pre>
+<h3>The STEPS Constant</h3>
+<p>The STEPS value lets you define how the 3 dimensional surface is plotted in the 2 dimensional image. The value is a positive number and the higher the value the better it can be distinction between the statewide average of the z-value and the minimum and
+ maximum of the z-value.</p>
+<p>For instance you set set STEPS to 6:</p>
+<pre>define(&quot;STEPS&quot;, 6);</pre>
+<p>When you have define the constants include the file contour.php in your script, for instance using:</p>
+<pre>require_once(&quot;contour.php&quot;);</pre>
+<h3>Creation and Computation</h3>
+<p>To create a contour plot create a new object of the Contourplot class:</p>
+<pre>$plot=new Contourplot();</pre>
+<p>&nbsp;</p>
+<p>Then call the object main function. The main function takes 6 arguments:</p>
+<p>$D is the 3 dimensional surface<br>
+$x_size is the width of image<br>
+$y_size is the height of the image<br>
+$A is the geographic shapefile<br>
+$mean is the statewide average of the z-value<br>
+ALPHA is a constant Alphashape</p>
+<pre>$res = $plot-&gt;main( $D, $x_size, $y_size, $A, $mean, ALPHA);</pre>
+<p>The main function returns the number of triangles. The class also creates internal data from the input like the indices of the triangles (in object-&gt;indices), the triangles (in object-&gt;delaunay) and the convex hull (in object-&gt;hull).</p>
+<p>&nbsp;</p>
+<h3>Rendering the Graph</h3>
+<p>The second part of the work of the class is to implement the algorithm to draw the contour plot diagram.</p>
+<p>Create a new object Image from the graph class and feed it with an imagemagick resource. Use the function draw() to render the image and output it to show in the browser.&nbsp;</p>
+<div>
+<pre>$pic = new Image($plot);
+$pic-&gt;draw($im);
+ImageGIF($im);
+ImageDestroy($im);</pre>
+</div>
+<h2>Conclusion</h2>
+<p>Contour plots can be useful for many applications that need to generate visualizations of how certain physical measurements like altitude or temperature vary within a given geographic region.</p>
+<p>Despite they requires some relatively complex algorithms, the PHP Contour package makes it easy to generate this kind of diagrams in your PHP applications.</p>
+<p>If you liked this article or you have a question about this topic, post a comment to this article here.</p>
+<p>&nbsp;</p>
+<p>[1] Thanks to phpclasses.org!</p>
+<p>&nbsp;</p>
+</div><div class="ClearBoth"></div>
